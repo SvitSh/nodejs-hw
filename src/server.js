@@ -1,7 +1,12 @@
 import express from 'express';
 import cors from 'cors';
-import pinoHttp from 'pino-http';
 import dotenv from 'dotenv';
+
+import { connectMongoDB } from './db/connectMongoDB.js';
+import { logger } from './middleware/logger.js';
+import { notFoundHandler } from './middleware/notFoundHandler.js';
+import { errorHandler } from './middleware/errorHandler.js';
+import notesRouter from './routes/notesRoutes.js';
 
 dotenv.config();
 
@@ -10,28 +15,12 @@ const app = express();
 // базовые middleware
 app.use(cors());
 app.use(express.json());
+app.use(logger);
 
-// pino-http (красивые логи в dev, обычные в prod)
-const usePretty = process.env.NODE_ENV !== 'production';
-app.use(
-  pinoHttp(
-    usePretty
-      ? { transport: { target: 'pino-pretty', options: { translateTime: 'SYS:standard' } } }
-      : {}
-  )
-);
+// --- регистрация роутов ---
+app.use('/notes', notesRouter);
 
-// ---- notes routes (temporary responses) ----
-app.get('/notes', (_req, res) => {
-  res.status(200).json({ message: 'Retrieved all notes' });
-});
-
-app.get('/notes/:noteId', (req, res) => {
-  const { noteId } = req.params;
-  res.status(200).json({ message: `Retrieved note with ID: ${noteId}` });
-});
-
-// ---- test error route ----
+// тестовая ошибка
 app.get('/test-error', () => {
   throw new Error('Simulated server error');
 });
@@ -41,20 +30,18 @@ app.get('/health', (_req, res) => {
   res.status(200).json({ status: 'ok' });
 });
 
-// 404 — после всех роутов
-app.use((req, res, _next) => {
-  res.status(404).json({ message: 'Route not found' });
-});
-
-// 500 — обработчик ошибок
-app.use((err, req, res, _next) => {
-  req.log?.error?.(err);
-  const message = err.message || 'Internal Server Error';
-  res.status(500).json({ message });
-});
+// 404 и 500
+app.use(notFoundHandler);
+app.use(errorHandler);
 
 const PORT = process.env.PORT || 3030;
-app.listen(PORT, () => {
-  // eslint-disable-next-line no-console
-  console.log(`Server listening on port ${PORT}`);
-});
+
+try {
+  await connectMongoDB(); // подключаемся к Mongo перед стартом сервера
+  app.listen(PORT, () => {
+    console.log(`Server listening on port ${PORT}`);
+  });
+} catch (err) {
+  console.error('Failed to start server:', err.message);
+  process.exit(1);
+}

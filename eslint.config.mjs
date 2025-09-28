@@ -1,26 +1,23 @@
-import js from '@eslint/js';
-import globals from 'globals';
-import eslintConfigPrettier from 'eslint-config-prettier';
+import globals from "globals";
+import pluginJs from "@eslint/js";
+import eslintConfigPrettier from "eslint-config-prettier";
 
 export default [
-  // Базовые рекомендации ESLint
-  js.configs.recommended,
+  // игнор системных папок
+  { ignores: ["node_modules/**", ".history/**"] },
 
-  // Наши настройки под Node/CommonJS
   {
-    files: ['**/*.js'],
+    files: ["**/*.js", "**/*.mjs"],
     languageOptions: {
-      ecmaVersion: 'latest',
-      sourceType: 'commonjs',
-      globals: {
-        ...globals.node,
-      },
+      ecmaVersion: 2023,
+      sourceType: "module",
+      globals: { ...globals.node },
     },
     rules: {
-      'no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
+      "no-unused-vars": ["warn", { argsIgnorePattern: "^_" }],
     },
   },
 
-  // Отключаем правила, конфликтующие с Prettier — держим последним
+  pluginJs.configs.recommended,
   eslintConfigPrettier,
 ];
