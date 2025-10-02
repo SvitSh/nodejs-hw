@@ -36,11 +36,19 @@ export async function updateNote(req, res, next) {
   try {
     const { noteId } = req.params;
     const { title, content, tag } = req.body;
+
+    // формируем объект обновлений только из переданных полей
+    const updates = {};
+    if (title !== undefined) updates.title = title;
+    if (content !== undefined) updates.content = content;
+    if (tag !== undefined) updates.tag = tag;
+
     const updated = await Note.findByIdAndUpdate(
       noteId,
-      { $set: { ...(title !== undefined && { title }), ...(content !== undefined && { content }), ...(tag !== undefined && { tag }) } },
+      { $set: updates },
       { new: true, runValidators: true }
     ).lean();
+
     if (!updated) return next(createHttpError(404, 'Note not found'));
     res.status(200).json(updated);
   } catch (err) {

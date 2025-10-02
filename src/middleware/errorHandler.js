@@ -1,5 +1,4 @@
-import createHttpError from 'http-errors';
-const { HttpError } = createHttpError;
+import createHttpError, { HttpError } from 'http-errors';
 
 export function errorHandler(err, req, res, _next) {
   req.log?.error?.(err);
