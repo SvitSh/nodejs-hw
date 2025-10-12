@@ -1,15 +1,43 @@
-import { Note } from '../models/note.js';
 import createHttpError from 'http-errors';
+import { Note } from '../models/note.js';
 
-export async function getAllNotes(_req, res, next) {
+// GET /notes ?page & perPage & tag & search
+export async function getAllNotes(req, res, next) {
   try {
-    const notes = await Note.find().lean();
-    res.status(200).json(notes);
+    const { page = 1, perPage = 10, tag, search } = req.query;
+
+    const pageNum = Math.max(1, Number(page) || 1);
+    const perPageNum = Math.min(20, Math.max(5, Number(perPage) || 10));
+
+    const filter = {};
+    if (tag) filter.tag = tag;
+    if (typeof search === 'string') {
+      const s = search.trim();
+      if (s !== '') filter.$text = { $search: s };
+    }
+
+    const skip = (pageNum - 1) * perPageNum;
+
+    const [totalNotes, notes] = await Promise.all([
+      Note.countDocuments(filter),
+      Note.find(filter).sort({ createdAt: -1 }).skip(skip).limit(perPageNum).lean(),
+    ]);
+
+    const totalPages = Math.max(1, Math.ceil(totalNotes / perPageNum));
+
+    res.status(200).json({
+      page: pageNum,
+      perPage: perPageNum,
+      totalNotes,
+      totalPages,
+      notes,
+    });
   } catch (err) {
     next(err);
   }
 }
 
+// GET /notes/:noteId
 export async function getNoteById(req, res, next) {
   try {
     const { noteId } = req.params;
@@ -21,23 +49,23 @@ export async function getNoteById(req, res, next) {
   }
 }
 
+// POST /notes
 export async function createNote(req, res, next) {
   try {
-    const { title, content = '', tag } = req.body;
-    if (!title) return next(createHttpError(400, 'Title is required'));
+    const { title, content = '', tag = 'Todo' } = req.body;
     const created = await Note.create({ title, content, tag });
-    res.status(201).json(created);
+    res.status(201).json(created.toJSON());
   } catch (err) {
     next(err);
   }
 }
 
+// PATCH /notes/:noteId
 export async function updateNote(req, res, next) {
   try {
     const { noteId } = req.params;
     const { title, content, tag } = req.body;
 
-    // формируем объект обновлений только из переданных полей
     const updates = {};
     if (title !== undefined) updates.title = title;
     if (content !== undefined) updates.content = content;
@@ -56,6 +84,7 @@ export async function updateNote(req, res, next) {
   }
 }
 
+// DELETE /notes/:noteId
 export async function deleteNote(req, res, next) {
   try {
     const { noteId } = req.params;

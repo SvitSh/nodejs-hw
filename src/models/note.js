@@ -1,17 +1,5 @@
 import mongoose from 'mongoose';
-
-const TAGS = [
-  'Work',
-  'Personal',
-  'Meeting',
-  'Shopping',
-  'Ideas',
-  'Travel',
-  'Finance',
-  'Health',
-  'Important',
-  'Todo',
-];
+import { TAGS } from '../constants/tags.js';
 
 const noteSchema = new mongoose.Schema(
   {
@@ -21,5 +9,8 @@ const noteSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+// текстовый индекс для поиска по title и content
+noteSchema.index({ title: 'text', content: 'text' });
 
 export const Note = mongoose.model('Note', noteSchema);
