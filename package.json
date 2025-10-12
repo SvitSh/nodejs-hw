@@ -22,6 +22,7 @@
   },
   "homepage": "https://github.com/SvitSh/nodejs-hw#readme",
   "dependencies": {
+    "celebrate": "^15.0.3",
     "cors": "^2.8.5",
     "dotenv": "^17.2.2",
     "express": "^5.1.0",
