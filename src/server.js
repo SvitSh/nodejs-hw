@@ -11,6 +11,12 @@ import notesRouter from './routes/notesRoutes.js';
 import authRouter from './routes/authRoutes.js';
 
 const app = express();
+app.head('/', (_req, res) => res.sendStatus(404));
+app.get('/', (_req, res) => res.status(404).json({ message: 'Not found' }));
+
+app.head('/', (_req, res) => res.sendStatus(404));
+app.get('/', (_req, res) => res.status(404).json({ message: 'Not found' }));
+
 
 app.use(cors());
 app.use(express.json());
