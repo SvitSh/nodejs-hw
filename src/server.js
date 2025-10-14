@@ -19,15 +19,16 @@ app.use(logger);
 
 app.get('/health', (_req, res) => res.status(200).json({ ok: true }));
 
-app.use('/auth', authRouter);
-app.use('/notes', notesRouter);
+app.use(authRouter);
+app.use(notesRouter);
 
 app.use(notFoundHandler);
 import { errors as celebrateErrors } from 'celebrate';
 app.use(celebrateErrors());
+app.use(celebrateErrors());
 app.use(errorHandler);
 
-const PORT = process.env.PORT || 3030;
+const PORT = process.env.PORT || 3000;
 
 try {
   await connectMongoDB(process.env.MONGO_URL);
