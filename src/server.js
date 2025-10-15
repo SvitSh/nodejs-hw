@@ -9,28 +9,27 @@ import { notFoundHandler } from './middleware/notFoundHandler.js';
 import { errorHandler } from './middleware/errorHandler.js';
 import notesRouter from './routes/notesRoutes.js';
 import authRouter from './routes/authRoutes.js';
+import { errors as celebrateErrors } from 'celebrate';
 
 const app = express();
-app.head('/', (_req, res) => res.sendStatus(404));
-app.get('/', (_req, res) => res.status(404).json({ message: 'Not found' }));
+
+
+
+
 
 app.head('/', (_req, res) => res.sendStatus(404));
 app.get('/', (_req, res) => res.status(404).json({ message: 'Not found' }));
-
 
 app.use(cors());
 app.use(express.json());
 app.use(cookieParser());
 app.use(logger);
 
-app.get('/health', (_req, res) => res.status(200).json({ ok: true }));
 
 app.use(authRouter);
 app.use(notesRouter);
 
 app.use(notFoundHandler);
-import { errors as celebrateErrors } from 'celebrate';
-app.use(celebrateErrors());
 app.use(celebrateErrors());
 app.use(errorHandler);
 

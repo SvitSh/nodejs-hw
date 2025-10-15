@@ -48,7 +48,6 @@ export async function getNoteById(req, res, next) {
 export async function createNote(req, res, next) {
   try {
     const { title, content, tag } = req.body;
-    if (!title) return next(createHttpError(400, 'Title is required'));
     const created = await Note.create({ title, content, tag, userId: req.user._id });
     res.status(201).json(created);
   } catch (err) {
