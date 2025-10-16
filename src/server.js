@@ -9,14 +9,12 @@ import { notFoundHandler } from './middleware/notFoundHandler.js';
 import { errorHandler } from './middleware/errorHandler.js';
 import notesRouter from './routes/notesRoutes.js';
 import authRouter from './routes/authRoutes.js';
+import userRouter from './routes/userRoutes.js';
 import { errors as celebrateErrors } from 'celebrate';
 
 const app = express();
 
-
-
-
-
+// корень — всегда 404
 app.head('/', (_req, res) => res.sendStatus(404));
 app.get('/', (_req, res) => res.status(404).json({ message: 'Not found' }));
 
@@ -25,9 +23,10 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(logger);
 
-
+// порядок: роуты → 404 → ошибки
 app.use(authRouter);
 app.use(notesRouter);
+app.use(userRouter);
 
 app.use(notFoundHandler);
 app.use(celebrateErrors());
