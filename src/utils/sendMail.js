@@ -20,6 +20,8 @@ const transporter = nodemailer.createTransport({
 });
 
 export async function sendEmail({ to, subject, html }) {
-  const info = await transporter.sendMail({ from: SMTP_FROM, to, subject, html });
+  const info = try { await transporter.sendMail({ from: SMTP_FROM, to, subject, html }); } catch (e) { console.error('[sendMail error]', e?.message); throw e; }
   return info;
 }
+
+export async function verifySmtp(){ try{ await transporter.verify(); return { ok:true }; } catch(e){ console.error("[SMTP verify]", e?.message); return { ok:false, error:e?.message }; }}

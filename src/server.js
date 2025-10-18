@@ -10,6 +10,7 @@ import { errorHandler } from './middleware/errorHandler.js';
 import notesRouter from './routes/notesRoutes.js';
 import authRouter from './routes/authRoutes.js';
 import userRouter from './routes/userRoutes.js';
+import { verifySmtp } from './utils/sendMail.js';
 import { errors as celebrateErrors } from 'celebrate';
 
 const app = express();
@@ -26,6 +27,7 @@ app.use(logger);
 // порядок: роуты → 404 → ошибки
 app.use(authRouter);
 app.use(notesRouter);
+app.get('/__smtp-verify', async (_req,res)=>{ res.json(await verifySmtp()); });
 app.use(userRouter);
 
 app.use(notFoundHandler);
