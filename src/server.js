@@ -32,7 +32,7 @@ app.use(notFoundHandler);
 app.use(celebrateErrors());
 app.use(errorHandler);
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3030;
 
 try {
   await connectMongoDB(process.env.MONGO_URL);
